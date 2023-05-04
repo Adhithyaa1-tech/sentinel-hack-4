@@ -46,7 +46,32 @@ module.exports.register = async function(req, res) {
 
 module.exports.login = async function(req, res) {
     try {
-        
+        const {email, password} = req.body;
+
+        const user = await User.findOne({email}).select('+password');
+
+       
+
+        const isMatch = await user.matchPassword(password);
+
+        if(!isMatch || !user) {
+            return res.status(401).json({
+                success: false,
+                message: 'incorrect credentials'
+            })
+        }
+
+        //once user is found, i.e, hes logged in, server will generate a token and this token will be stored in the cookie
+
+        const token = await user.generateToken();
+
+
+        res.status(200).cookie('token', token, {expires: new Date() + 1000* 60 * 60, httpOnly: true }).json({
+            success: true,
+            message: 'user found!',
+            user,
+            token
+        })
         
     } catch (error) {
         res.status(500).json({
