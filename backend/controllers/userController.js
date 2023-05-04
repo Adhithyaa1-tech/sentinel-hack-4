@@ -65,8 +65,12 @@ module.exports.login = async function(req, res) {
 
         const token = await user.generateToken();
 
+        // const options = {
+        //     expires: 
+        // }
 
-        res.status(200).cookie('token', token, {expires: new Date() + 1000* 60 * 60, httpOnly: true }).json({
+
+        res.status(200).cookie('token', token, {expires: new Date(Date.now() + 1000* 60 * 60)  , httpOnly: true }).json({
             success: true,
             message: 'user found!',
             user,
@@ -76,6 +80,22 @@ module.exports.login = async function(req, res) {
     } catch (error) {
         res.status(500).json({
             success:false,
+            message: error.message
+        })
+    }
+}
+
+module.exports.logout = async function(req, res) {
+    try {
+        res.status(200).cookie('token', null, {expires: new Date(Date.now()) , httpOnly: true })
+            .json({
+                success: true,
+                message: 'Logged out'
+            })
+        
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
             message: error.message
         })
     }
